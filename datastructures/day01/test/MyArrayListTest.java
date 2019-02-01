@@ -50,6 +50,7 @@ public class MyArrayListTest {
     @Test
     public void testAddIndex(){
         cows.add(1,JAQUAN);
+        cows.list();
         assertEquals(5,cows.size());
         assertEquals(GEORGY,cows.get(2));
         cows.add(1,LEGOS);

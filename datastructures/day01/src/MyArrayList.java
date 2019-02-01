@@ -4,35 +4,28 @@ public class MyArrayList {
 
     // Runtime: O(1)
     public MyArrayList() {
-        this.size = 10;
-        this.elems = new Cow[this.size];
+        this.size = 0;
+        this.elems = new Cow[10];
     }
 
     // Runtime: O(1)
     public MyArrayList(int capacity) {
-        this.size = capacity;
+        this.size = 0;
         this.elems = new Cow[capacity];
     }
 
-    // Runtime: O(n)
+    // Runtime: O(1)
     public void add(Cow c) {
         this.resize(1);
-        for (int i = 0; i < this.elems.length; i++) {
-            if (this.elems[i] == null) {
-                this.elems[i] = c;
-                break;
-            }
+        if (this.elems[this.size] == null) {
+            this.elems[this.size] = c;
+            this.size++;
         }
     }
 
-    // Runtime: O(n)
+    // Runtime: O(1)
     public int size() {
-        int sz = 0;
-        for (int i = 0; i < this.elems.length; i++)
-            if (this.elems[i] != null) {
-                sz++;
-            }
-        return sz;
+        return this.size;
     }
 
     // Runtime: O(n)
@@ -44,6 +37,7 @@ public class MyArrayList {
                 index++;
             }
             this.elems[index] = null;
+            this.size--;
             this.resize(-1);
             return c;
         } else {
@@ -67,6 +61,7 @@ public class MyArrayList {
             oldElems = new Cow[this.elems.length];
             System.arraycopy(this.elems, 0, oldElems, 0, this.elems.length);
             this.resize(1);
+            this.size++;
 
             for (int i = index; i <= oldElems.length; i++) {
                 if (i == index) {
@@ -95,7 +90,6 @@ public class MyArrayList {
 
         System.arraycopy(this.elems, 0, newElems, 0, this.size());
         this.elems = newElems;
-        this.size = this.elems.length;
     }
 
     // Runtime: O(n)
