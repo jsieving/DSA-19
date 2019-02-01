@@ -44,6 +44,7 @@ public class MyArrayListTest {
         cows.remove(1);
         assertEquals(2,cows.size());
         assertEquals(JIMY,cows.get(1));
+        cows.remove(1);
     }
 
     @Test
