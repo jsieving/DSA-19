@@ -1,5 +1,5 @@
 # Day02 - `Linked Lists, Stacks, and Queues`
-This homework is due Monday, February 1st (see below for submission details).
+This homework is due Monday, February 4th (see below for submission details).
 # Learning Goals
 
 - Understand memory allocation of linked lists
@@ -43,7 +43,7 @@ public class Chicken {
     String color;
 }
 ```
-The tests you will be running on your `MyLinkedList` class will be using this `Chicken` class.
+The tests you will be running on your `MyLinkedList` class will be using this `Chicken` class. Remember to update the **attribute** called size (which is the current amount of chickens) as you add and remove chickens.
 
 1. Implement an empty constructor. Initialize `head`, `tail`, and `size`.
 
@@ -125,5 +125,5 @@ System.out.println(q.dequeueMax()); // this should print 3, and remove the 3 fro
 
 To get credit when you're done:
 
-- Go to NINJA hours to get checked off (on or before Monday, February 1st)
+- Go to NINJA hours to get checked off (on or before Monday, February 4th)
 - Submit [this](https://tinyurl.com/OlinDSA-02) survey
