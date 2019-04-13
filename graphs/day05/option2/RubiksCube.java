@@ -69,7 +69,7 @@ public class RubiksCube {
         // Each state needs to keep track of its cost and the previous state
         private RubiksCube rubiks;
         private int moves; // equal to g-cost in A*
-        public int cost; // equal to f-cost in A*
+        public double cost; // equal to f-cost in A*
         public char lastMove; // rotation taken to get here
         private State prev;
 
@@ -78,7 +78,7 @@ public class RubiksCube {
             this.moves = moves;
             this.lastMove = lastMove;
             this.prev = prev;
-            cost = moves + cost();
+            cost = (double) moves + cost();
         }
 
         @Override
@@ -89,25 +89,17 @@ public class RubiksCube {
             return ((State) s).rubiks.equals(this.rubiks);
         }
 
-        public int cost() {
-            int total = 0;
+        public double cost() {
+            double total = 0;
             int correctColor;
-            for (int i = 0; i < 24; i++) {
-                correctColor = i / 4;
-                if (correctColor != rubiks.getColor(i)) total++;
+            for (int[] cubie : cubies) {
+                int cubieTotal = 0;
+                for (int square : cubie) {
+                    correctColor = square / 4;
+                    if (correctColor != rubiks.getColor(square)) cubieTotal++;
+                }
+                total += Math.pow((double) cubieTotal, .652); // this is DUMB.
             }
-            //TODO: implement cost function
-            return total;
-        }
-
-        public int cost2() {
-            int total = 0;
-            int correctColor;
-            for (int i = 0; i < 24; i++) {
-                correctColor = i / 4;
-                if (correctColor != rubiks.getColor(i)) total++;
-            }
-            //TODO: implement cost function
             return total;
         }
     }
@@ -280,7 +272,8 @@ public class RubiksCube {
 
     public List<Character> solve() {
         HashMap<RubiksCube,Integer> visited = new HashMap<>();
-        Queue<State> queue = new PriorityQueue<>((o1, o2) -> {return o1.cost - o2.cost;});
+        // (o1, o2) -> {return o1.cost - o2.cost;} // for when cost is an int
+        Queue<State> queue = new PriorityQueue<>((o1, o2) -> {return Double.compare(o1.cost, o2.cost);});
         visited.put(this, 0);
         State curr = new State(this, 0, '\0', null);
         queue.offer(curr);
