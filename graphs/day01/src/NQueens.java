@@ -48,10 +48,43 @@ public class NQueens {
         return B;
     }
 
+    public static void printBoard(char[][] board) {
+        for (char[] row : board) {
+            for (char c : row) {
+                System.out.printf(" %c", c);
+            }
+            System.out.print("\n");
+        }
+        System.out.print("\n");
+    }
+
+    public static void nQueensHelper(int row, List<Integer> cols, char[][] curr, List<char[][]> solutions) {
+        if (cols.size() == 0) {
+            solutions.add(curr);
+        }
+        for (int c : cols) {
+            if (!checkDiagonal(curr, row, c)) {
+                char[][] curr_temp = copyOf(curr);
+                List<Integer> cols_temp = new ArrayList<>(cols);
+                cols_temp.remove(Integer.valueOf(c));
+                curr_temp[row][c] = 'Q';
+                nQueensHelper(row + 1, cols_temp, curr_temp, solutions);
+            }
+        }
+
+    }
 
     public static List<char[][]> nQueensSolutions(int n) {
-        // TODO
+        List<Integer> cols = new ArrayList<>();
+        for(int i = 0; i < n; i++) {cols.add(i);}
+        char[][] board = new char[n][n];
+        for (int x = 0; x < n; x++) {
+            for (int y = 0; y < n; y++) {
+                board[x][y] = '.';
+            }
+        }
         List<char[][]> answers = new ArrayList<>();
+        nQueensHelper(0, cols, board, answers);
         return answers;
     }
 
