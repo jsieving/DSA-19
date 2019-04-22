@@ -141,9 +141,15 @@ public class MyLinkedList {
     public Chicken remove(int index) {
         Node n = this.getNode(index);
         if (n == this.head) {
+            if (head.next !=null) {
+                this.head.next.prev = null;
+            }
             this.head = this.head.next;
         }
         if (n == this.tail) {
+            if (tail.prev != null) {
+                this.tail.prev.next = null;
+            }
             this.tail = this.tail.prev;
         }
         if (0 < index && index < this.size-1) {

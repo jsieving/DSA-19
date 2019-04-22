@@ -25,6 +25,22 @@ public class RedBlackTree<T extends Comparable<T>> extends BinarySearchTree<T> {
         return true;
     }
 
+    void printTree(TreeNode<T> n, int d, char s) {
+        if (d == 0) System.out.print('\n');
+        if (n != null) {
+            System.out.printf("\n%c", s);
+            for (int i = 0; i < d; i++) {
+                if (n.color == BLACK) {
+                    System.out.print(" _ ");
+                } else {
+                    System.out.print(" . ");
+                }
+            }
+            System.out.print(n.key);
+            printTree(n.leftChild, d + 1, 'L');
+            printTree(n.rightChild, d + 1, 'R');
+        }
+    }
 
     //For the rotates, don't forget to reassign colors. If you are unclear about
     //how to do this, you can try drawing ou examples and make sure you
@@ -34,20 +50,40 @@ public class RedBlackTree<T extends Comparable<T>> extends BinarySearchTree<T> {
     //-No 2 red nodes in a row
 
     // make a left-leaning link lean to the right
-    TreeNode<T> rotateRight(TreeNode<T> h) {
-        // TODO
-        return h;
+    TreeNode<T> rotateRight(TreeNode<T> n) {
+        if (n.leftChild != null) {
+            TreeNode<T> m = n.leftChild;
+            TreeNode<T> beta = m.rightChild;
+            m.rightChild = n;
+            n.leftChild = beta;
+            boolean temp = n.color;
+            n.color = m.color;
+            m.color = temp;
+            return m;
+        }
+        return n;
     }
 
     // make a right-leaning link lean to the left
-    TreeNode<T> rotateLeft(TreeNode<T> h) {
-        // TODO
-        return h;
+    TreeNode<T> rotateLeft(TreeNode<T> n) {
+        if (n.rightChild != null) {
+            TreeNode<T> m = n.rightChild;
+            TreeNode<T> beta = m.leftChild;
+            m.leftChild = n;
+            n.rightChild = beta;
+            boolean temp = n.color;
+            n.color = m.color;
+            m.color = temp;
+            return m;
+        }
+        return n;
     }
 
     // flip the colors of a TreeNode and its two children
     TreeNode<T> flipColors(TreeNode<T> h) {
-        // TODO
+        h.color = !h.color;
+        h.rightChild.color = !h.rightChild.color;
+        h.leftChild.color = !h.leftChild.color;
         return h;
     }
 
@@ -60,19 +96,27 @@ public class RedBlackTree<T extends Comparable<T>> extends BinarySearchTree<T> {
      * return balanced node
      */
     private TreeNode<T> balance(TreeNode<T> h) {
-        // TODO
+        if (isRed(h.rightChild)) {
+            h = rotateLeft(h);
+        }
+        if (isRed(h.leftChild) && isRed(h.leftChild.leftChild)) {
+            h = rotateRight(h);
+        }
+        if (isRed(h.leftChild) && isRed(h.rightChild)) {
+            flipColors(h);
+        }
         return h;
     }
 
 
     /**
      * Recursively insert a new node into the BST
-     * Runtime: TODO
+     * Runtime: O(n)
      */
     @Override
     TreeNode<T> insert(TreeNode<T> h, T key) {
         h = super.insert(h, key);
-        // TODO: use balance to correct for the three rotation cases
+        h = balance(h);
         return h;
     }
 
@@ -113,11 +157,26 @@ public class RedBlackTree<T extends Comparable<T>> extends BinarySearchTree<T> {
     // delete the key-value pair with the minimum key rooted at h
     TreeNode<T> deleteMin(TreeNode<T> h) {
         // OPTIONAL TODO: write this function and use it in delete(h, key)
-        return h;
+        if (h.leftChild == null) {
+            return null;
+        }
+        if(!isRed(h.leftChild) && !isRed(h.leftChild.leftChild)) {
+            flipColors(h);
+            if (isRed(h.rightChild.leftChild)) {
+                h.rightChild = rotateRight(h.rightChild);
+                h = rotateLeft(h);
+                flipColors(h);
+            }
+        }
+        h.leftChild = deleteMin(h.leftChild);
+        return balance(h);
     }
     // delete the key-value pair with the given key rooted at h
     TreeNode<T> delete(TreeNode<T> h, T key) {
         // OPTIONAL TODO
+        h = super.delete(h, key);
+//        h = balance(h);
+//        root.color = BLACK;
         return h;
     }
 
@@ -125,8 +184,6 @@ public class RedBlackTree<T extends Comparable<T>> extends BinarySearchTree<T> {
     //          LLRB Verification
     // ====================================
 
-
-    // TODO: understand how the following functions can be used to verify a valid LLRB
 
     public boolean is23() {
         return is23(root);
@@ -139,6 +196,10 @@ public class RedBlackTree<T extends Comparable<T>> extends BinarySearchTree<T> {
         if (isRed(n.leftChild) && isRed(n.leftChild.leftChild)) return false;
         return is23(n.rightChild) && is23(n.leftChild);
     }
+    // Ensures that node has at most 1 red link on the left side. The maximum number
+    // of children for a node with no red links is 2, and the maximum number of
+    // children for a pair of nodes with a red link is 3 (since 1 spot on the higher
+    // node is occupied.
 
     public boolean isBalanced() {
         return isBalanced(root) != -1;
@@ -147,12 +208,15 @@ public class RedBlackTree<T extends Comparable<T>> extends BinarySearchTree<T> {
     // return -1 if the tree is not balanced. Otherwise, return the black-height of the tree
     private int isBalanced(TreeNode<T> n) {
         if (n == null) return 0;
-        int lBalanced = isBalanced(n.leftChild);
+        int lBalanced = isBalanced(n.leftChild); // first, count black/check balance below n
         int rBalanced = isBalanced(n.rightChild);
-        if (lBalanced == -1 || rBalanced == -1) return -1;
-        if (isBlack(n.leftChild)) lBalanced++;
+        if (lBalanced == -1 || rBalanced == -1) return -1; // if either was not balanced, fail
+        if (isBlack(n.leftChild)) lBalanced++; // increase black count if appropriate
         if (isBlack(n.rightChild)) rBalanced++;
-        if (lBalanced != rBalanced) return -1;
+        if (lBalanced != rBalanced) return -1; // check that they are balanced
+        // calling this on a node with left-red and right-black will work because
+        // the left child will have to have a taller tree (higher black-count initially)
+        // and that will get made up for when the right black is added.
         return lBalanced;
     }
 

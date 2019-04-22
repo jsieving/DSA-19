@@ -5,6 +5,8 @@ public class RangeNode<T extends Comparable<T>> {
     public RangeNode<T> leftChild;
     public RangeNode<T> rightChild;
     public int height;
+    public int subLeft;
+    public int subRight;
 
     public RangeNode(T key) {
         this(key, 0);
@@ -15,6 +17,8 @@ public class RangeNode<T extends Comparable<T>> {
         this.leftChild = null;
         this.rightChild = null;
         this.height = height;
+        this.subLeft = 0;
+        this.subRight = 0;
     }
 
     public boolean hasLeftChild() {

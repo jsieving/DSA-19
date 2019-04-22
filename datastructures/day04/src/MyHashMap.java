@@ -15,6 +15,7 @@ public class MyHashMap<K, V> implements Map<K, V> {
     // array of buckets
     protected LinkedList<Entry>[] buckets;
     private int size = 0;
+    public int rf = 0;
 
     public MyHashMap() {
         initBuckets(MIN_BUCKETS);
@@ -50,10 +51,9 @@ public class MyHashMap<K, V> implements Map<K, V> {
      * given a key, return the bucket where the `K, V` pair would be stored if it were in the map.
      */
     private LinkedList<Entry> chooseBucket(Object key) {
-        // TODO
-        // hint: use key.hashCode() to calculate the key's hashCode using its built in hash function
-        // then use % to choose which bucket to return.
-        return null;
+        int hashCode = key.hashCode();
+        int n = hashCode % buckets.length;
+        return buckets[n];
     }
 
     @Override
@@ -71,8 +71,12 @@ public class MyHashMap<K, V> implements Map<K, V> {
      */
     @Override
     public boolean containsKey(Object key) {
-        // TODO
-        return false;
+        Entry e = retrieve(key);
+        if (e != null) {
+            return true;
+        } else {
+            return false;
+        }
     }
 
     /**
@@ -80,13 +84,53 @@ public class MyHashMap<K, V> implements Map<K, V> {
      */
     @Override
     public boolean containsValue(Object value) {
-        // TODO
+        for (LinkedList<Entry> l : buckets) {
+            Iterator<Entry> i = l.iterator();
+            Entry e = null;
+            if (i.hasNext()) {
+                e = i.next();
+            }
+            while (e != null) {
+                if (e.value != null && e.value.equals(value)) {
+                    return true;
+                } else if (value == null) {
+                    return true;
+                } else if (i.hasNext()) {
+                    e = i.next();
+                } else {
+                    break;
+                }
+            }
+        }
         return false;
     }
 
     @Override
     public V get(Object key) {
-        // TODO
+        Entry e = retrieve(key);
+        if (e != null) {
+            return e.value;
+        } else {
+            return null;
+        }
+    }
+
+    private Entry retrieve(Object key) {
+        LinkedList<Entry> l = chooseBucket(key);
+        Iterator<Entry> i = l.iterator();
+        Entry e = null;
+        if (i.hasNext()) {
+            e = i.next();
+        }
+        while (e != null) {
+            if (e.key.equals(key)) {
+                return e;
+            } else if (i.hasNext()) {
+                e = i.next();
+            } else {
+                break;
+            }
+        }
         return null;
     }
 
@@ -96,10 +140,28 @@ public class MyHashMap<K, V> implements Map<K, V> {
      */
     @Override
     public V put(K key, V value) {
-        // TODO: Complete this method
-        // hint: use chooseBucket() to determine which bucket to place the pair in
-        // hint: use rehash() to appropriately grow the hashmap if needed
-        return null;
+        Entry prev = retrieve(key);
+        if (prev != null) {
+            V oldVal = prev.value;
+            System.out.printf("Replacing: %s = %s <- %s\n", key, oldVal, value);
+            prev.value = value;
+            return oldVal;
+        } else {
+            if ((float) (size+1)/ (float) buckets.length > ALPHA) {
+                System.out.printf("Growing\n");
+                System.out.printf("\tOld length: %d, old contents length: %d\n", buckets.length, size);
+                rehash(GROWTH_FACTOR);
+                System.out.printf("\tNew length: %d, new contents length: %d\n", buckets.length, size+1);
+            }
+            Entry e = new Entry(key, value);
+            LinkedList<Entry> l = chooseBucket(key);
+            l.add(e);
+            if (value != null && (int) value > 8500) {
+                System.out.printf("Inserting: %s = %s, %b\n", key, value, containsKey(key));
+            }
+            size++;
+            return null;
+        }
     }
 
     /**
@@ -109,9 +171,29 @@ public class MyHashMap<K, V> implements Map<K, V> {
      */
     @Override
     public V remove(Object key) {
-        // TODO
-        // hint: use chooseBucket() to determine which bucket the key would be
-        // hint: use rehash() to appropriately grow the hashmap if needed
+        LinkedList<Entry> l = chooseBucket(key);
+        if (!containsKey(key)) { return null; }
+        int i = 0;
+        V retVal;
+        for (Entry e : l) {
+            if (e.key.equals(key)) {
+                retVal = e.value;
+                l.remove(i);
+                size--;
+                if (((float) (size) / (float) buckets.length < BETA) && ((float) ((float) buckets.length * SHRINK_FACTOR) >= (float) MIN_BUCKETS)) {
+                    System.out.printf("Shrinking\n");
+                    System.out.printf("\tOld length: %d, new contents length: %d\n", buckets.length, size);
+                    rehash(SHRINK_FACTOR);
+                    System.out.printf("\tNew length: %d, new contents length: %d\n", buckets.length, size);
+
+                }
+                return retVal;
+            } else {
+                i++;
+            }
+        }
+        System.out.printf("Removal failed: %s\n", key);
+        rf++;
         return null;
     }
 
@@ -128,8 +210,30 @@ public class MyHashMap<K, V> implements Map<K, V> {
      * the number of buckets is divided by 4.
      */
     private void rehash(double growthFactor) {
-        // TODO
-        // hint: once you have removed all values from the buckets, use put(k, v) to add them back in the correct place
+        Object[] entries = new Object[size];
+        int count = 0;
+        for (LinkedList<Entry> l : buckets) {
+            Iterator<Entry> i = l.iterator();
+            Entry e = null;
+            if (i.hasNext()) {
+                e = i.next();
+            }
+            while (e != null) {
+                entries[count] = e;
+                count++;
+                if (i.hasNext()) {
+                    e = i.next();
+                } else {
+                    break;
+                }
+            }
+        }
+        initBuckets((int) ((double) buckets.length * growthFactor));
+        size = 0;
+        for (int i = 0; i < count; i++) {
+            Entry e = (Entry) entries[i];
+            put(e.key, e.value);
+        }
     }
 
     private void initBuckets(int size) {

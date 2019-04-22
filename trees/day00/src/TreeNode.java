@@ -37,6 +37,17 @@ public class TreeNode<T extends Comparable<T>> {
         return !this.hasLeftChild() && !this.hasRightChild();
     }
 
+    public void printTree(TreeNode<T> n, int d) {
+        if (d == 0) System.out.print('\n');
+        if (n != null) {
+            for (int i = 0; i < d; i++) System.out.print(" _ ");
+            System.out.print(n.key);
+            System.out.print("\n|");
+            printTree(n.leftChild, d + 1);
+            printTree(n.rightChild, d + 1);
+        }
+    }
+
     public void replaceWith(TreeNode<T> n) {
         if (isLeftChild())
             parent.leftChild = n;

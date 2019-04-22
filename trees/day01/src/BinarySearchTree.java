@@ -61,10 +61,12 @@ public class BinarySearchTree<T extends Comparable<T>> {
             } else if (n.rightChild == null) {
                 return n.leftChild;
             } else {
-                TreeNode<T> tmp = n;
-                n = min(tmp.rightChild);
+                TreeNode<T> tmp = n; // save pointers from original
+                n = min(tmp.rightChild); // set n to n's successor
                 n.rightChild = deleteMin(tmp.rightChild);
-                n.leftChild = tmp.leftChild;
+                // deletes successor & returns pointer to the successor's successor
+                // (min's next-highest, null if min of branch)
+                n.leftChild = tmp.leftChild; // left child is unchanged
             }
         }
         return n;

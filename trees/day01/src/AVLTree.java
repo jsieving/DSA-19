@@ -1,4 +1,17 @@
+import com.sun.source.tree.Tree;
+
 public class AVLTree<T extends Comparable<T>> extends BinarySearchTree<T> {
+
+    void printTree(TreeNode<T> n, int d) {
+        if (d == 0) System.out.print('\n');
+        if (n != null) {
+            for (int i = 0; i < d; i++) System.out.print(" _ ");
+            System.out.print(n.key);
+            System.out.print("\n|");
+            printTree(n.leftChild, d + 1);
+            printTree(n.rightChild, d + 1);
+        }
+    }
 
     /**
      * Delete a key from the tree rooted at the given node.
@@ -7,11 +20,10 @@ public class AVLTree<T extends Comparable<T>> extends BinarySearchTree<T> {
     TreeNode<T> delete(TreeNode<T> n, T key) {
         n = super.delete(n, key);
         if (n != null) {
-            // TODO
-            // update the height of the tree using the height of the left and right child
-            // return balance(n)
+            n.height = height(n);
+            n = balance(n);
         }
-        return null;
+        return n;
     }
 
     /**
@@ -21,11 +33,10 @@ public class AVLTree<T extends Comparable<T>> extends BinarySearchTree<T> {
     TreeNode<T> insert(TreeNode<T> n, T key) {
         n = super.insert(n, key);
         if (n != null) {
-            // TODO
-            // update the height of the tree using the height of the left and right child
-            // return balance(n)
+            n = balance(n);
+            n.height = height(n);
         }
-        return null;
+        return n;
     }
 
     /**
@@ -43,8 +54,10 @@ public class AVLTree<T extends Comparable<T>> extends BinarySearchTree<T> {
 
     // Return the height of the given node. Return -1 if null.
     private int height(TreeNode<T> n) {
-        // TODO
-        return 0;
+        if (n == null) {
+            return -1;
+        }
+        return 1 + Math.max(height(n.leftChild), height(n.rightChild));
     }
 
     public int height() {
@@ -53,8 +66,19 @@ public class AVLTree<T extends Comparable<T>> extends BinarySearchTree<T> {
 
     // Restores the AVL tree property of the subtree. Return the head of the new subtree
     TreeNode<T> balance(TreeNode<T> n) {
-        // TODO: (if you're having trouble, use pseudocode provided in slides)
-        return null;
+        if (balanceFactor(n) > 1) {
+            if (balanceFactor(n.rightChild) < 0) {
+                n.rightChild = rotateRight(n.rightChild);
+            }
+            n = rotateLeft(n);
+        }
+        if (balanceFactor(n) < -1) {
+            if (balanceFactor(n.leftChild) > 0) {
+                n.leftChild = rotateLeft(n.leftChild);
+            }
+            n = rotateRight(n);
+        }
+        return n;
     }
 
     /**
@@ -65,23 +89,39 @@ public class AVLTree<T extends Comparable<T>> extends BinarySearchTree<T> {
      * most one.
      */
     private int balanceFactor(TreeNode<T> n) {
-        // TODO
-        return 0;
+        if (n == null) { return 0;}
+        return height(n.rightChild) - height(n.leftChild);
     }
 
     /**
      * Perform a right rotation on node `n`. Return the head of the rotated tree.
      */
     private TreeNode<T> rotateRight(TreeNode<T> n) {
-        // TODO
-        return null;
+        if (n.hasLeftChild()) {
+            TreeNode m = n.leftChild;
+            TreeNode beta = m.rightChild;
+            m.rightChild = n;
+            n.leftChild = beta;
+            n.height = height(n); // --;
+            m.height = height(m); // ++;
+            return m;
+        }
+        return n;
     }
 
     /**
      * Perform a left rotation on node `n`. Return the head of the rotated tree.
      */
     private TreeNode<T> rotateLeft(TreeNode<T> n) {
-        // TODO
-        return null;
+        if (n.hasRightChild()) {
+            TreeNode m = n.rightChild;
+            TreeNode beta = m.leftChild;
+            m.leftChild = n;
+            n.rightChild = beta;
+            n.height = height(n); // --;
+            m.height = height(m); // ++;
+            return m;
+        }
+        return n;
     }
 }
