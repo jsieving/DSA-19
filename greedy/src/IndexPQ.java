@@ -53,6 +53,11 @@ public class IndexPQ<Key extends Comparable<Key>> {
     }
 
 
+    public Key getMinWeight() { // added by Jane
+        return keys[pq[1]];
+    }
+
+
     public void changeKey(int i, Key key) {
         if (i < 0 || i >= maxN) throw new IllegalArgumentException();
         if (!contains(i)) throw new NoSuchElementException("index is not in the priority queue");
@@ -73,6 +78,15 @@ public class IndexPQ<Key extends Comparable<Key>> {
             throw new IllegalArgumentException("Calling decreaseKey() with given argument would not strictly decrease the key");
         keys[i] = key;
         swim(qp[i]);
+    }
+
+    public void lesserKey(int i, Key key) {
+        if (i < 0 || i >= maxN) throw new IllegalArgumentException();
+        if (!contains(i)) throw new NoSuchElementException("index is not in the priority queue");
+        if (keys[i].compareTo(key) > 0) {
+            keys[i] = key;
+            swim(qp[i]);
+        }
     }
 
 
