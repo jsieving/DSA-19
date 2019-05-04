@@ -1,5 +1,3 @@
-import java.util.Arrays;
-
 public class BalloonPopping {
 
     static int[][] memo;
@@ -8,44 +6,46 @@ public class BalloonPopping {
 
     public static int maxPoints(int[] B) {
         size = B.length;
-        balloons = new int[size];
-        System.arraycopy(B, 0, balloons, 0, B.length);
+        balloons = B;
 
-        memo = new int[size][size];
+        memo = new int[size][size]; // make a memo array: row is start of popped balloons, column is end
         for (int i = 0; i < size; i++) {
             for (int j = 0; j < size; j++){
-                if (i > j) memo[i][j] = 0;
-                else memo[i][j] = -1;
+                if (i <= j) { memo[i][j] = -1; }
             }
         }
 
-        printMemo();
-        int res = recurse(0, size-1);
-        printMemo();
+        int res = maxPointsOver(0, size-1); // find best way to pop balloons 0:size
+//        printMemo();
         return res;
     }
 
-    public static int recurse(int i, int j) {
-        if (i > j) {
-            memo[i][j] = 0;
+    public static int maxPointsOver(int i, int j) {
+        if (i > j) { // if start is more than end, don't do anything
             return 0;
         }
 
-        if (memo[i][j] != -1) {
+        if (memo[i][j] != -1) { // if this subarray has already been solved, return its result
             return memo[i][j];
         }
 
-        if (i == j) {
+        if (i == j) { // if you're only popping one balloon, calculate the points you get
             memo[i][j] = getBalloon(i-1) * getBalloon(i) * getBalloon(i+1);
             return memo[i][j];
         }
 
-        int leftVal = recurse(i, j-1);
-        int downVal = recurse(i+1, j);
-        int leftFirst = leftVal + downVal * getBalloon(i-1) / getBalloon(j);
-        int downFirst = downVal + leftVal * getBalloon(j+1) / getBalloon(i+1);
+        int max = 0; // max for this subarray
+        int test; // result of popping a particular balloon last
+        int lastProduct; // points from popping each last balloon
+        for (int last = i; last <= j; last++) { // iterate through which balloon was popped last
+            lastProduct = getBalloon(i-1) * getBalloon(last) * getBalloon(j+1); // points from that
+            // sum the max points possible from popping the previous balloons on the left,
+            // the previous balloons on the right, and this last one
+            test = maxPointsOver(i, last-1) + lastProduct + maxPointsOver(last+1, j);
+            if (test > max) { max = test; } // update the max
+        }
 
-        memo[i][j] = Math.max(leftFirst, downFirst);
+        memo[i][j] = max;
         return memo[i][j];
     }
 
